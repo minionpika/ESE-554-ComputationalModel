@@ -1,0 +1,176 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Stack;
+
+class InfixToPostfix {
+    private String input;
+    private StringBuilder output = new StringBuilder();
+
+    public InfixToPostfix(String in) {
+        input = in;
+    }
+
+    public String doTransform() {
+        Stack<Character> operatorStack = new Stack<>();
+        boolean expectingOperand = true;
+
+        for (int i = 0; i < input.length(); i++) {
+            char ch = input.charAt(i);
+
+            if (Character.isDigit(ch) || ch == '.') {
+                if (!expectingOperand) {
+                    output.append(' ');
+                }
+                output.append(ch);
+                while (i + 1 < input.length() && (Character.isDigit(input.charAt(i + 1)) || input.charAt(i + 1) == '.')) {
+                    output.append(input.charAt(++i));
+                }
+                expectingOperand = false;
+            } else if (ch == '+' || ch == '-') {
+                if (expectingOperand) {
+                    // Unary operator
+                    if (ch == '-') {
+                        output.append('-');
+                    }
+                } else {
+                    // Binary operator
+                    while (!operatorStack.isEmpty() && isOperator(operatorStack.peek())) {
+                        char opTop = operatorStack.pop();
+                        if (getPrecedence(ch) <= getPrecedence(opTop)) {
+                            output.append(' ').append(opTop);
+                        } else {
+                            operatorStack.push(opTop);
+                            break;
+                        }
+                    }
+                    operatorStack.push(ch);
+                    expectingOperand = true;
+                }
+            } else if (isOperator(ch)) {
+                while (!operatorStack.isEmpty() && isOperator(operatorStack.peek())) {
+                    char opTop = operatorStack.pop();
+                    if (getPrecedence(ch) <= getPrecedence(opTop)) {
+                        output.append(' ').append(opTop);
+                    } else {
+                        operatorStack.push(opTop);
+                        break;
+                    }
+                }
+                operatorStack.push(ch);
+                expectingOperand = true;
+            } else if (ch == '(') {
+                operatorStack.push(ch);
+                expectingOperand = true;
+            } else if (ch == ')') {
+                while (!operatorStack.isEmpty() && operatorStack.peek() != '(') {
+                    output.append(' ').append(operatorStack.pop());
+                }
+                if (!operatorStack.isEmpty() && operatorStack.peek() == '(') {
+                    operatorStack.pop(); // Pop the left parenthesis.
+                } else {
+                    throw new IllegalArgumentException("Mismatched parentheses");
+                }
+                expectingOperand = false;
+            }
+        }
+
+        while (!operatorStack.isEmpty()) {
+            char opTop = operatorStack.pop();
+            if (opTop == '(') {
+                throw new IllegalArgumentException("Mismatched parentheses");
+            }
+            output.append(' ').append(opTop);
+        }
+
+        return output.toString().trim();
+    }
+
+    private boolean isOperator(char c) {
+        return c == '+' || c == '-' || c == '*' || c == '/';
+    }
+
+    private int getPrecedence(char operator) {
+        switch (operator) {
+            case '+':
+            case '-':
+                return 1;
+            case '*':
+            case '/':
+                return 2;
+            default:
+                return 0;
+        }
+    }
+}
+
+class ParsePost {
+    private String input;
+
+    public ParsePost(String s) {
+        input = s;
+    }
+
+    public double doParse() {
+        Stack<Double> theStack = new Stack<>();
+        String[] tokens = input.split(" ");
+
+        for (String token : tokens) {
+            if (token.isEmpty()) {
+                continue;
+            }
+            if (Character.isDigit(token.charAt(0)) || (token.length() > 1 && token.charAt(0) == '-' && Character.isDigit(token.charAt(1)))) {
+                // Operand: Push onto the stack as a double.
+                theStack.push(Double.parseDouble(token));
+            } else {
+                // Operator: Pop operands and perform the operation.
+                double num2 = theStack.pop();
+                double num1 = theStack.pop();
+                double result = performOperation(num1, num2, token.charAt(0));
+                theStack.push(result);
+            }
+        }
+
+        if (!theStack.isEmpty()) {
+            return theStack.pop();
+        } else {
+            throw new IllegalArgumentException("Invalid postfix expression");
+        }
+    }
+
+    private double performOperation(double num1, double num2, char operator) {
+        switch (operator) {
+            case '+':
+                return num1 + num2;
+            case '-':
+                return num1 - num2;
+            case '*':
+                return num1 * num2;
+            case '/':
+                if (num2 != 0) {
+                    return num1 / num2;
+                } else {
+                    throw new ArithmeticException("Division by zero");
+                }
+            default:
+                throw new IllegalArgumentException("Invalid operator: " + operator);
+        }
+    }
+}
+
+public class jee {
+    public static void main(String[] args) throws IOException {
+        InputStreamReader isr = new InputStreamReader(System.in);
+        BufferedReader br = new BufferedReader(isr);
+        System.out.print("Enter an infix expression: ");
+        String input = br.readLine();
+
+        InfixToPostfix ifpf = new InfixToPostfix(input);
+        String postfix = ifpf.doTransform();
+        System.out.println("Postfix expression: " + postfix);
+
+        ParsePost parser = new ParsePost(postfix);
+        double result = parser.doParse();
+        System.out.println("Result: " + result);
+}
+}

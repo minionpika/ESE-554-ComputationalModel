@@ -1,0 +1,91 @@
+package stackWith2Queues;
+
+
+import java.util.*;
+
+public class jee {
+    public static String infixToPostfix(String infix) {
+        StringBuilder postfix = new StringBuilder();
+        Deque<Character> operatorStack = new LinkedList<>();
+
+        for (int i = 0; i < infix.length(); i++) {
+            char c = infix.charAt(i);
+
+            if (Character.isDigit(c)) {
+                // Operand: Append to the postfix expression.
+                postfix.append(c);
+                while (i + 1 < infix.length() && (Character.isDigit(infix.charAt(i + 1)) || infix.charAt(i + 1) == '.')) {
+                    postfix.append(infix.charAt(++i));
+                }
+                postfix.append(' '); // Add a space to separate operands.
+            } else if (c == '-') {
+                // Check if '-' is a unary operator.
+                if (i == 0 || infix.charAt(i - 1) == '(') {
+                    // Unary minus (negation).
+                    operatorStack.push('~'); // Use '~' to represent unary minus.
+                } else {
+                    // Binary minus.
+                    while (!operatorStack.isEmpty() && getPrecedence(operatorStack.peek()) >= getPrecedence(c)) {
+                        postfix.append(operatorStack.pop()).append(' ');
+                    }
+                    operatorStack.push(c);
+                }
+            } else if (isOperator(c)) {
+                // Operator: Process according to precedence and associativity.
+                while (!operatorStack.isEmpty() && getPrecedence(operatorStack.peek()) >= getPrecedence(c)) {
+                    postfix.append(operatorStack.pop()).append(' ');
+                }
+                operatorStack.push(c);
+            } else if (c == '(') {
+                // Left parenthesis: Push onto the operator stack.
+                operatorStack.push(c);
+            } else if (c == ')') {
+                // Right parenthesis: Pop operators from the stack until a left parenthesis is encountered.
+                while (!operatorStack.isEmpty() && operatorStack.peek() != '(') {
+                    postfix.append(operatorStack.pop()).append(' ');
+                }
+                if (!operatorStack.isEmpty() && operatorStack.peek() == '(') {
+                    operatorStack.pop(); // Pop the left parenthesis.
+                } else {
+                    throw new IllegalArgumentException("Mismatched parentheses");
+                }
+            }
+        }
+
+        // Pop any remaining operators from the stack to the output.
+        while (!operatorStack.isEmpty()) {
+            if (operatorStack.peek() == '(') {
+                throw new IllegalArgumentException("Mismatched parentheses");
+            }
+            postfix.append(operatorStack.pop()).append(' ');
+        }
+
+        return postfix.toString().trim();
+    }
+
+    public static boolean isOperator(char c) {
+        return c == '+' || c == '-' || c == '*' || c == '/';
+    }
+
+    public static int getPrecedence(char operator) {
+        switch (operator) {
+            case '+':
+            case '-':
+                return 1;
+            case '*':
+            case '/':
+                return 2;
+            case '~':
+                return 3; // Unary minus (negation) has higher precedence.
+            default:
+                return 0; // Default for non-operators.
+        }
+    }
+
+    public static void main(String[] args) {
+        String infixExpression = "2 * -3 + 4";
+        String postfixExpression = infixToPostfix(infixExpression);
+        System.out.println("Infix: " + infixExpression);
+        System.out.println("Postfix: " + postfixExpression);
+    }
+}

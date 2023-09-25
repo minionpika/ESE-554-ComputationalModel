@@ -1,0 +1,37 @@
+package iHateEvenSubarrays;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+
+public class _3IHateEvenSubarrays {
+
+	public static String minimizeString(String s) {
+	 Stack<Character> stack = new Stack<>();
+     
+     for (char c : s.toCharArray()) {
+         if (!stack.isEmpty() && stack.peek() == c) {
+             stack.pop();
+         } else {
+             stack.push(c);
+         }
+     }
+     
+     if (stack.isEmpty()) {
+         return "EMPTY";
+     } else {
+         StringBuilder result = new StringBuilder();
+         while (!stack.isEmpty()) {
+             result.append(stack.pop());
+         }
+         return result.reverse().toString();
+     }
+	}
+     
+     public static void main(String[] args) {
+         String binaryString = "10111111111111111111111111111";
+         String result = minimizeString(binaryString);
+         System.out.println(result);  // Output: "EMPTY"
+     }
+}

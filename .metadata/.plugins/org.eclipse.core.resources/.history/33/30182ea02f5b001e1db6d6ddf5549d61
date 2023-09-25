@@ -1,0 +1,275 @@
+package arithmaticCalculator;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+
+class StackChar
+{
+	private int maxSize, top;
+	private char[] stackArray;
+
+	public StackChar(int s) {
+		maxSize = s;
+		stackArray = new char[maxSize];
+		top = -1;
+	}
+
+	public void push(char j) {
+		if (isFull())
+			return;
+		stackArray[++top] = j;
+	}
+
+	public char pop() {
+		if (isEmpty())
+			return '0';
+		return stackArray[top--];
+	}
+
+	public char peek() {
+		return stackArray[top];
+	}
+
+	public boolean isEmpty() {
+		return (top == -1);
+	}
+	
+	public boolean isFull() {
+		return (top == maxSize-1);
+	}
+
+	public int size() {
+		return (top+1);
+	}
+}
+
+class StackDouble
+{
+	private int maxSize;
+	private double[] stackArray;
+	private int top;
+
+	public StackDouble(int s) {
+		maxSize = s;
+		stackArray = new double[maxSize];
+		top = -1;
+	}
+
+	public void push(double j) {
+		if (isFull())
+			return;
+		stackArray[++top] = j;
+	}
+
+	public double pop() {
+		if (isEmpty())
+			return -1;
+		return stackArray[top--];
+	}
+
+	public double peek() {
+		return stackArray[top];
+	}
+
+	public boolean isEmpty() {
+		return (top == -1);
+	}
+	
+	public boolean isFull() {
+		return (top == maxSize-1);
+	}
+
+	public int size() {
+		return (top+1);
+	}
+}
+
+class InfixToPostfix
+{
+	private StackChar theStack;
+	private String input, output = "";
+
+	public InfixToPostfix(String in) {
+		input = in;
+		theStack = new StackChar((int)in.length());
+	}
+
+	public String doTransform() {
+		char ch, ch1;
+
+		for (int i=0; i<input.length(); i++) {
+			ch = input.charAt(i);
+
+			if (ch == '+' || ch == '-')
+				gotOper(ch, 1);
+			
+			else if (ch == '*' || ch == '/')
+				gotOper(ch, 2);
+			
+			else if (ch == '(')
+				theStack.push(ch);
+			
+			else if (ch == ')')
+				gotParen();
+			
+			else {
+				if (i != 0) {
+					ch1 = input.charAt(i-1);
+	
+					if (Character.isDigit(ch1) || ch1 == '.')
+						output = output + ch;	// continuous digit, no need to insert space
+					else
+						output = output + ' ' + ch;		// new digit, insert space
+				}
+				else
+					output = output + ch;	// i==0 no space needed
+			}
+		}
+
+		while (!theStack.isEmpty())
+			output = output + theStack.pop();
+
+		return output;
+	}
+
+	public void gotOper(char opThis, int prec1) {
+		int prec2;
+		char opTop;
+
+		while (!theStack.isEmpty()) {
+			opTop = theStack.pop();
+			
+			if (opTop == '(') {
+				theStack.push(opTop);
+				break;
+			}
+			else {
+				if (opTop == '+' || opTop == '-')
+					prec2 = 1;
+				else
+					prec2 = 2;
+			
+				//if (opTop == '-' && (theStack.isEmpty() || prec2 < prec1)) {
+				if (prec2 < prec1) { 
+					theStack.push(opTop);
+					break;
+				}
+				else
+					output = output + opTop;
+			}
+		}
+		theStack.push(opThis);
+	}
+
+	public void gotParen() {
+		char chx;
+
+		while (!theStack.isEmpty()) {
+			chx = theStack.pop();
+			if (chx == '(')
+				break;
+			else
+				output = output + chx;
+		} 
+	}
+} 
+
+
+class ParsePost
+{
+	private StackDouble theStack;
+	private String input;
+	private int postfixLength;
+	
+	public ParsePost(String s) {
+		input = s;
+		postfixLength = s.length();
+	}
+	
+	public double doParse() {
+		int i=0, j=0;
+		double num1, num2, interAns;
+		char ch, ch1;
+		String number;
+		theStack = new StackDouble(100000);		// random size
+
+		for (j=0; j<postfixLength; j++) {
+			ch = input.charAt(j);
+
+			if (Character.isDigit(ch) || ch == '.') {	// here we're making the full number
+				number = "";
+				number += ch;
+
+				for (i=j+1; i<postfixLength; i++) {
+					ch1 = input.charAt(i);
+					if (Character.isDigit(ch1) || ch1 == '.')
+						number += ch1;
+					else
+						break;
+				}
+				
+				j=i-1;
+				theStack.push(Double.parseDouble(number));			
+			}
+			else if (ch == ' ') {	// no need to put that space in the stack
+				continue;
+			}
+			else {
+				num2 = theStack.pop();
+//				if (theStack.isEmpty())		// handle case: -2+3
+//					num1 = 0;
+//				else
+					num1 = theStack.pop();
+
+				switch(ch)
+				{
+					case '+':
+						interAns = num1 + num2;
+						break;
+					case '-':
+						interAns = num1 - num2;
+						break;
+					case '*':
+						interAns = num1 * num2;
+						break;
+					case '/':
+						interAns = num1 / num2;
+						break;
+					default:
+						interAns = 0;
+				}
+	
+				theStack.push(interAns);
+			}
+		}
+
+		interAns = theStack.pop();
+		return interAns;
+	}
+}
+
+
+public class _4ArithmaticCalculator {
+	
+	static String getString() throws IOException {
+		InputStreamReader isr = new InputStreamReader(System.in);
+		BufferedReader br = new BufferedReader(isr);
+		String s = br.readLine();
+		return s;
+	}
+
+	public static void main(String[] args) throws IOException {
+		String input, output;
+
+		input = getString();
+		
+		InfixToPostfix ifpf = new InfixToPostfix(input);
+		output = ifpf.doTransform();
+		System.out.println("Postfix equation: " + output);
+		
+		ParsePost aParser = new ParsePost(output);
+		System.out.println("Evaluates to: " + aParser.doParse());	// do the evaluation
+	}
+}

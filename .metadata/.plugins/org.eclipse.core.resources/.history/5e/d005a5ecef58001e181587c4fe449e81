@@ -1,0 +1,44 @@
+package iHateEvenSubarrays;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+
+public class _3IHateEvenSubarrays {
+
+	static String getString() throws IOException {
+		InputStreamReader isr = new InputStreamReader(System.in);
+		BufferedReader br = new BufferedReader(isr);
+		String s = br.readLine();
+		return s;
+	}
+	
+	public static void main(String[] args) throws IOException {
+		//int T = Integer.parseInt(getString());
+		String str = "10100000000000001111101101010110101000110101010100110011001100110011001111110000001100000000", out = "";
+		char ch;
+		Stack<Character> stack = new Stack<Character>();
+		
+		for (int i=0; i<str.length(); i++) {
+			ch = str.charAt(i);
+			if (!stack.empty() && stack.peek() == ch) {
+				stack.pop();
+				continue;
+			}
+			stack.push(ch);
+		}
+		
+		if (stack.empty())
+			System.out.println( "EMPTY" );
+		else {
+			while (!stack.empty()) {
+				out += stack.pop();
+				//stack.pop();
+			}
+			StringBuffer sbr = new StringBuffer(out);
+	        sbr.reverse();
+			System.out.println( sbr.toString() );
+		}
+	}
+}
