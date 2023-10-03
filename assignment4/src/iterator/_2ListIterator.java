@@ -3,16 +3,14 @@ package iterator;
 
 class Node
 {
-	public int data;
-	public Node right;
-	public Node bottom;
+	public int data, row, col;
+	public Node right; // right link in list
+	public Node bottom; // bottom link in list
 
-	public Node(int d) {
+	public Node(int r, int c, int d) {
 		data = d;
-	}
-
-	public void displayLink() {
-		System.out.print("{" + data + ", " + "}");
+		row = r;
+		col = c;
 	}
 }
 
@@ -20,37 +18,40 @@ class LinkList
 {
 	private int row, col;
 	private Node first;
-	//Iterator itr;
+	Node[] rowHeads;
 
 	public LinkList(int r, int c) {
 		first = null;
 		row = r;
 		col = c;
-		
-		generateMatrix();
+		rowHeads = new Node[row];
 	}
 	
-	public void generateMatrix() {
-		Node[] rowHeads = new Node[row];
+	public boolean isValidPosition(int r, int c) {
+		return (1 <= r && r <= this.row) && (1 <= c && c <= this.col);
+	}
 
-		for (int i=0; i<row; i++) {
-			rowHeads[i] = new Node(-1);
+	public void goTo(int r, int c) {
+		for (int i=0; i<r; i++) {
+			if (rowHeads[i] == null) {
+				rowHeads[i] = new Node(r, c, -1);
+			}
 			Node tmp = rowHeads[i];
 	
-	        for (int j = 1; j < col; j++) {
-	            Node n = new Node(-1);
-	            tmp.right = n;
-	            tmp = tmp.right;
+	        for (int j = 1; j < c; j++) {
+	        	if (tmp.right == null) {
+	        		tmp.right = new Node(r, c, -1);
+	        	}
+            	tmp = tmp.right;
 	        }
 		}
 
 		first = rowHeads[0];
-		
-		for (int i=0; i<row-1; i++) {
+		for (int i=0; i<r-1; i++) {		// for connection purpose
 			Node tmp = rowHeads[i];
 			Node tmp1 = rowHeads[i+1];
 			
-			for (int j=0; j<col; j++) {
+			for (int j=0; j<c; j++) {
 				tmp.bottom = tmp1;
 				tmp = tmp.right;
 				tmp1 = tmp1.right;
@@ -59,6 +60,10 @@ class LinkList
 	}
 
 	public void insert(int r, int c, int key) {
+		if (!isValidPosition(r, c))
+			return;
+		
+		goTo(r, c);
 		Node tmp = first;
 
 		for (int i=1; i<r; i++)
@@ -67,32 +72,31 @@ class LinkList
 		for (int j=1; j<c; j++)
 			tmp = tmp.right;
 
-		if (tmp.data != -1)
+		if (tmp.data != -1 && tmp.row == r && tmp.col == c)
 			System.out.println("a cell already exists in that location");
 		else
 			tmp.data = key;
 	}
 
 	public Node delete(int r, int c) {
+		if (!isValidPosition(r, c))
+			return null;
+
 		Node top = first;
 		Node left = first;
 		
-		for (int i=1; i<r; i++) {
-			
+		for (int i=1; i<r; i++)
 			left = left.bottom;
-		}
-		for (int j=1; j<c-1; j++) {
-			
+
+		for (int j=1; j<c-1; j++)
 			left = left.right;
-		}
-		for (int i=1; i<r-1; i++) {
-			
+
+		for (int i=1; i<r-1; i++)
 			top = top.bottom;
-		}
-		for (int j=1; j<c; j++) {
-			
+
+		for (int j=1; j<c; j++)
 			top = top.right;
-		}
+
 		
 		Node del = null;
 		if (top.bottom != null || left.right != null) {
@@ -101,7 +105,6 @@ class LinkList
 			del.data = -1;
 			left.right = del.right;
 			top.bottom = del.bottom;
-			//System.out.println(left.data+" "+top.data);
 		}
 		else {
 			System.out.println("no link exist in this location");
@@ -132,10 +135,7 @@ class LinkList
 	public Node getFirst() {
 		return first;
 	}
-	
-	public boolean isValidPosition(int r, int c) {
-		return (0 <= r && r <= this.row) && (0 <= c && c <= this.col);
-	}
+
 }
 
 class Iterator
@@ -222,19 +222,16 @@ public class _2ListIterator
 		theList.delete(2, 4);
 		theList.displayList();
 		
-		theList.insert(1, 4, 111);
-		theList.displayList();
-		
 		/////////////////////////////////////////////////////////////
 		
-		LinkList itrList = new LinkList(r, c);
-		Iterator iter = itrList.getIterator();
+		System.out.println("Iterator checking");
+		Iterator iter = theList.getIterator();
 		
 		//iter.up();
 		iter.down();
 		//iter.left();
 		iter.right();
-		iter.getValue();
+		System.out.println("get value: "+ iter.getValue());
 		iter.changeValue(1000);
 		//iter.removeValue();
 		iter.display();
@@ -243,7 +240,7 @@ public class _2ListIterator
 		iter.down();
 		//iter.left();
 		iter.right();
-		iter.getValue();
+		System.out.println("get value: "+ iter.getValue());
 		iter.changeValue(1001);
 		//iter.removeValue();
 		iter.display();
