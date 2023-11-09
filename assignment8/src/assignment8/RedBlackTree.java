@@ -252,11 +252,11 @@ public class RedBlackTree extends BinaryTree {
 		}
 	}
 
-	/*		 node			      X
-			/    \			       \
+	/*           node		         X
+		    /    \		          \
 		   X      75	==>		 node
-			\                   /    \
-			Y                  Y     75
+			    \                   /    \
+			     Y                 Y     75
 	 */
 	private void rightRotate(Node node) {
 		if (node.leftChild != null) {
@@ -280,9 +280,9 @@ public class RedBlackTree extends BinaryTree {
 		}
 	}
 
-	/*		 node				   X
-			/    \			      /
-		   25     X	    ==>		 node
+	/*		 node		       X
+			/    \		      /
+		       25     X	    ==>	     node
 			     /              /    \
 			    Y              25     Y
 	 */
