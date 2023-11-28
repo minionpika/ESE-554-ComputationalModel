@@ -224,14 +224,14 @@ class Tree {
 
 	public void displayTree()
 	{
-		Stack globalStack = new Stack();
+		Stack<Node> globalStack = new Stack<Node>();
 		globalStack.push(root);
 		int nBlanks = 32;
 		boolean isRowEmpty = false;
 		System.out.println("......................................................");
 
 		while (isRowEmpty==false) {
-			Stack localStack = new Stack();
+			Stack<Node> localStack = new Stack<Node>();
 			isRowEmpty = true;
 			for(int j=0; j<nBlanks; j++)
 				System.out.print(' ');
